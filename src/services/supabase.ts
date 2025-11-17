@@ -32,7 +32,7 @@ export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   }
 })
 
-export const handleSupabaseError = (error: any, context?: string) => {
+export const handleSupabaseError = (error: any, context?: string): never => {
   console.error(`Supabase error${context ? ` in ${context}` : ''}:`, error)
   
   if (error?.message) {

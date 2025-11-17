@@ -86,21 +86,74 @@ export class UserService {
 
       static async getUserSettings(userId: string): Promise<UserSettings | null> {
         try {
+          console.log(`[USER_SERVICE] 🔍 Getting user settings for: ${userId}`);
+          
           const { data, error } = await supabase
             .from("user_settings")
             .select("*")
             .eq("user_id", userId)
             .single();
 
-          if (error && error.code !== "PGRST116") {
+          if (error && error.code === "PGRST116") {
+            console.log(`[USER_SERVICE] ❌ No settings found, creating default settings for user: ${userId}`);
+            // Settings not found, create default ones ONLY
+            await this.createDefaultSettingsForUser(userId);
+            // Try to fetch the newly created settings
+            const { data: newData, error: newError } = await supabase
+              .from("user_settings")
+              .select("*")
+              .eq("user_id", userId)
+              .single();
+              
+            if (newError) {
+              console.error(`[USER_SERVICE] 🚨 Failed to create/fetch default settings:`, newError);
+              return null;
+            }
+            
+            console.log(`[USER_SERVICE] ✅ Default settings created and retrieved:`, newData);
+            return newData as UserSettings;
+          } else if (error) {
             handleSupabaseError(error, "kullanıcı ayarları sorgulama");
           }
 
+          console.log(`[USER_SERVICE] ✅ Existing user settings retrieved (not modified):`, data);
           return data as UserSettings;
         } catch (error: any) {
+          console.error(`[USER_SERVICE] 🚨 Get user settings error:`, error);
           if (error.message.includes("PGRST116")) {
             return null;
           }
+          throw error;
+        }
+      }
+
+      // Create default settings for users who don't have any
+      static async createDefaultSettingsForUser(userId: string): Promise<void> {
+        try {
+          console.log(`[USER_SERVICE] 🔧 Creating default settings for user: ${userId}`);
+          
+          const defaultSettings = {
+            user_id: userId,
+            push_notifications: true,
+            email_notifications: true,
+            new_features: true,
+            language: 'tr'
+          };
+
+          const { data, error } = await supabase
+            .from("user_settings")
+            .insert(defaultSettings)
+            .select("*")
+            .single();
+
+          if (error) {
+            console.error(`[USER_SERVICE] ❌ Failed to create default settings:`, error);
+            throw error;
+          } else {
+            console.log(`[USER_SERVICE] ✅ Default settings created:`, data);
+          }
+        } catch (error: any) {
+          console.error(`[USER_SERVICE] 🚨 Create default settings error:`, error);
           throw error;
         }
       }
@@ -127,18 +180,40 @@ export class UserService {
 
       static async getNotificationSettings(userId: string): Promise<{ push_notifications: boolean; email_notifications: boolean; new_features: boolean } | null> {
         try {
+          console.log(`[USER_SERVICE] 🔔 Getting notification settings for: ${userId}`);
+          
           const { data, error } = await supabase
             .from("user_settings")
             .select("push_notifications, email_notifications, new_features")
             .eq("user_id", userId)
             .single();
 
-          if (error && error.code !== "PGRST116") {
+          if (error && error.code === "PGRST116") {
+            console.log(`[USER_SERVICE] ❌ No notification settings found, creating default for user: ${userId}`);
+            // Settings not found, create default ones ONLY
+            await this.createDefaultSettingsForUser(userId);
+            // Try to fetch the newly created notification settings
+            const { data: newData, error: newError } = await supabase
+              .from("user_settings")
+              .select("push_notifications, email_notifications, new_features")
+              .eq("user_id", userId)
+              .single();
+              
+            if (newError) {
+              console.error(`[USER_SERVICE] 🚨 Failed to create/fetch notification settings:`, newError);
+              return null;
+            }
+            
+            console.log(`[USER_SERVICE] ✅ Default notification settings created and retrieved:`, newData);
+            return newData;
+          } else if (error) {
             handleSupabaseError(error, "bildirim ayarları sorgulama");
           }
 
+          console.log(`[USER_SERVICE] ✅ Existing notification settings retrieved (not modified):`, data);
           return data;
         } catch (error: any) {
+          console.error(`[USER_SERVICE] 🚨 Get notification settings error:`, error);
           if (error.message.includes("PGRST116")) {
             return null;
           }

@@ -1,0 +1,299 @@
+# Custom Models API Documentation
+
+## Overview
+The Custom Models API allows users to create, manage, and use custom fashion models through Fashion AI integration. Users can create models either from text descriptions (Model Create) or from product images (Product-to-Model).
+
+## Authentication
+All endpoints require JWT authentication via Bearer token in the Authorization header.
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+## Base URL
+```
+https://your-api-domain.com/api/custom-models
+```
+
+## Endpoints
+
+### 1. Create Custom Model
+Create a new custom model using Fashion AI.
+
+**Endpoint:** `POST /api/custom-models`
+
+**Request Body:**
+```json
+{
+  "name": "Summer Casual Look",
+  "prompt": "Full body shot, woman wearing white t-shirt and blue jeans, natural lighting",
+  "model_type": "model-create",
+  "product_image": "data:image/jpeg;base64,..." // Required for product-to-model
+}
+```
+
+**Parameters:**
+- `name` (string, required): User-defined name for the model
+- `prompt` (string, required): Text description for the model
+- `model_type` (string, required): Either "model-create" or "product-to-model"
+- `product_image` (string, optional): Base64 encoded image, required for product-to-model
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "user_id": "uuid",
+    "name": "Summer Casual Look",
+    "prompt": "Full body shot, woman wearing white t-shirt and blue jeans",
+    "model_type": "model-create",
+    "status": "processing",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### 2. Get User Models
+Retrieve all custom models for the authenticated user.
+
+**Endpoint:** `GET /api/custom-models`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "user_id": "uuid",
+      "name": "Summer Casual Look",
+      "prompt": "Full body shot, woman wearing white t-shirt and blue jeans",
+      "image_url": "https://cdn.example.com/model.jpg",
+      "model_type": "model-create",
+      "status": "completed",
+      "fashion_ai_request_id": "fashion-ai-123",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+### 3. Get Model by ID
+Retrieve a specific custom model by ID.
+
+**Endpoint:** `GET /api/custom-models/:id`
+
+**Parameters:**
+- `id` (string): Model UUID
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "user_id": "uuid",
+    "name": "Summer Casual Look",
+    "prompt": "Full body shot, woman wearing white t-shirt and blue jeans",
+    "image_url": "https://cdn.example.com/model.jpg",
+    "model_type": "model-create",
+    "status": "completed",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### 4. Update Model
+Update a custom model (currently supports name changes only).
+
+**Endpoint:** `PUT /api/custom-models/:id`
+
+**Request Body:**
+```json
+{
+  "name": "Updated Model Name"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "name": "Updated Model Name",
+    // ... other fields
+  }
+}
+```
+
+### 5. Delete Model
+Delete a custom model.
+
+**Endpoint:** `DELETE /api/custom-models/:id`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": null
+}
+```
+
+### 6. Get Model Status
+Check the processing status of a model.
+
+**Endpoint:** `GET /api/custom-models/:id/status`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "status": "completed",
+    "image_url": "https://cdn.example.com/model.jpg"
+  }
+}
+```
+
+### 7. Retry Model Creation
+Retry a failed model creation.
+
+**Endpoint:** `POST /api/custom-models/:id/retry`
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Model creation retried successfully"
+  }
+}
+```
+
+## Model Types
+
+### Model Create (`model-create`)
+Creates a fashion model from a text description.
+
+**Best Practices:**
+- Use detailed descriptions including clothing, pose, lighting
+- Specify colors, styles, and fits clearly
+- Include scene context (e.g., "natural lighting", "studio setting")
+
+**Example Prompts:**
+- "Full body shot, professional woman wearing black blazer and white shirt, office setting"
+- "Casual male model in blue denim jacket and dark jeans, standing pose, natural lighting"
+
+### Product to Model (`product-to-model`)
+Creates a fashion model wearing a specific product from an uploaded image.
+
+**Best Practices:**
+- Use high-quality, well-lit product images
+- Crop tightly around the product
+- Ensure product is clearly visible
+- Optional: Add scene description for context
+
+**Example Usage:**
+```json
+{
+  "name": "Red Sneaker Model",
+  "prompt": "professional studio setting with white background",
+  "model_type": "product-to-model",
+  "product_image": "data:image/jpeg;base64,..."
+}
+```
+
+## Status Values
+
+- `processing`: Model is being generated by Fashion AI
+- `completed`: Model has been successfully created
+- `failed`: Model creation failed (can be retried)
+
+## Error Responses
+
+All error responses follow this format:
+```json
+{
+  "success": false,
+  "error": "Error message describing what went wrong"
+}
+```
+
+Common error status codes:
+- `400`: Bad request (missing/invalid parameters)
+- `401`: Unauthorized (invalid/missing token)
+- `404`: Model not found
+- `500`: Internal server error
+
+## Usage Examples
+
+### Creating a Text-to-Model
+```javascript
+const response = await fetch('/api/custom-models', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: "Professional Look",
+    prompt: "Full body shot, businesswoman in navy suit and white blouse",
+    model_type: "model-create"
+  })
+});
+```
+
+### Creating a Product-to-Model
+```javascript
+// First convert image to base64
+const base64Image = await convertImageToBase64(productImage);
+
+const response = await fetch('/api/custom-models', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: "Nike Sneaker Model",
+    prompt: "modern street setting",
+    model_type: "product-to-model",
+    product_image: base64Image
+  })
+});
+```
+
+### Polling for Completion
+```javascript
+const checkStatus = async (modelId) => {
+  const response = await fetch(`/api/custom-models/${modelId}/status`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  
+  const result = await response.json();
+  
+  if (result.data.status === 'completed') {
+    console.log('Model ready!', result.data.image_url);
+  } else if (result.data.status === 'failed') {
+    console.log('Model failed, retry?');
+  } else {
+    // Still processing, check again later
+    setTimeout(() => checkStatus(modelId), 5000);
+  }
+};
+```
+
+## Rate Limits
+- Model creation: 10 requests per hour per user
+- Other operations: 100 requests per hour per user
+
+## Processing Time
+- Model Create: 5-15 minutes average
+- Product-to-Model: 3-10 minutes average
+
+Processing times may vary based on Fashion AI service load and complexity of the request.

@@ -12,6 +12,7 @@ export const tryOnService = {
           user_id: userId,
           ...tryOnData,
           processing_status: 'pending',
+          active: true,
         })
         .select()
         .single()
@@ -38,13 +39,14 @@ export const tryOnService = {
           wardrobe:wardrobe(*)
         `)
         .eq('user_id', userId)
+        .eq('active', true)
         .order('created_at', { ascending: false })
 
       if (error) {
         handleSupabaseError(error, 'getting try-ons')
       }
 
-      return data.map(item => ({
+      return (data || []).map(item => ({
         ...item,
         wardrobe: Array.isArray(item.wardrobe) ? item.wardrobe[0] || null : item.wardrobe,
       }))
@@ -66,6 +68,7 @@ export const tryOnService = {
         `)
         .eq('id', tryOnId)
         .eq('user_id', userId)
+        .eq('active', true)
         .single()
 
       if (error) {
@@ -91,6 +94,7 @@ export const tryOnService = {
         .update(updates)
         .eq('id', tryOnId)
         .eq('user_id', userId)
+        .eq('active', true)
         .select()
         .single()
 
@@ -111,9 +115,10 @@ export const tryOnService = {
 
       const { error } = await supabase
         .from('try_on')
-        .delete()
+        .update({ active: false })
         .eq('id', tryOnId)
         .eq('user_id', userId)
+        .eq('active', true)
 
       if (error) {
         handleSupabaseError(error, 'deleting try-on')
@@ -133,13 +138,14 @@ export const tryOnService = {
         .select('processing_status')
         .eq('id', tryOnId)
         .eq('user_id', userId)
+        .eq('active', true)
         .single()
 
       if (error) {
         handleSupabaseError(error, 'getting processing status')
       }
 
-      return data.processing_status
+      return data?.processing_status || 'failed'
     } catch (error) {
       handleSupabaseError(error, 'getting processing status')
       throw error
@@ -149,21 +155,18 @@ export const tryOnService = {
   async updateProcessingStatus(
     tryOnId: string, 
     status: 'pending' | 'processing' | 'completed' | 'failed',
-    resultImageUrl?: string,
-    falRequestId?: string
+    resultImageUrl?: string
   ): Promise<TryOn> {
     try {
-      const updates: Partial<TryOn> = { 
-        processing_status: status,
-        updated_at: new Date().toISOString()
+      const updates: { 
+        processing_status: 'pending' | 'processing' | 'completed' | 'failed'
+        result_image?: string
+      } = { 
+        processing_status: status
       }
       
       if (resultImageUrl) {
-        updates.result_image_url = resultImageUrl
-      }
-      
-      if (falRequestId) {
-        updates.fal_request_id = falRequestId
+        updates.result_image = resultImageUrl
       }
 
       const { data, error } = await supabase

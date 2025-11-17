@@ -1,0 +1,718 @@
+{
+  "info": {
+    "name": "Virtual Room - Multi-Modal AI Try-On Platform",
+    "description": "Comprehensive API collection for testing the new multi-modal AI try-on platform including Avatar Management, Custom Models, and Enhanced Try-On workflows",
+    "version": "2.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "avatar_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "model_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "try_on_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/../health",
+              "host": ["{{base_url}}"],
+              "path": ["..", "health"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data.token) {",
+                  "        pm.collectionVariables.set('auth_token', response.data.token);",
+                  "        pm.collectionVariables.set('user_id', response.data.user.id);",
+                  "        console.log('Auth token saved:', response.data.token.substring(0, 10) + '...');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Avatar Management",
+      "item": [
+        {
+          "name": "Create Avatar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data.id) {",
+                  "        pm.collectionVariables.set('avatar_id', response.data.id);",
+                  "        console.log('Avatar ID saved:', response.data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My AI Avatar\",\n  \"face_image_url\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/avatars",
+              "host": ["{{base_url}}"],
+              "path": ["avatars"]
+            }
+          }
+        },
+        {
+          "name": "Get All Avatars",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/avatars",
+              "host": ["{{base_url}}"],
+              "path": ["avatars"]
+            }
+          }
+        },
+        {
+          "name": "Get Avatar by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/avatars/{{avatar_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["avatars", "{{avatar_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Avatar Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/avatars/{{avatar_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["avatars", "{{avatar_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Update Avatar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Avatar Name\",\n  \"is_primary\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/avatars/{{avatar_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["avatars", "{{avatar_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Primary Avatar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/avatars/primary",
+              "host": ["{{base_url}}"],
+              "path": ["avatars", "primary"]
+            }
+          }
+        },
+        {
+          "name": "Set Avatar as Primary",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/avatars/{{avatar_id}}/set-primary",
+              "host": ["{{base_url}}"],
+              "path": ["avatars", "{{avatar_id}}", "set-primary"]
+            }
+          }
+        },
+        {
+          "name": "Retry Avatar Creation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/avatars/{{avatar_id}}/retry",
+              "host": ["{{base_url}}"],
+              "path": ["avatars", "{{avatar_id}}", "retry"]
+            }
+          }
+        },
+        {
+          "name": "Delete Avatar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/avatars/{{avatar_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["avatars", "{{avatar_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎨 Custom Models",
+      "item": [
+        {
+          "name": "Create Text-to-Model",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data.id) {",
+                  "        pm.collectionVariables.set('model_id', response.data.id);",
+                  "        console.log('Model ID saved:', response.data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Summer Casual Look\",\n  \"prompt\": \"Full body shot, professional woman wearing white t-shirt and blue jeans, natural lighting\",\n  \"model_type\": \"model-create\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/custom-models",
+              "host": ["{{base_url}}"],
+              "path": ["custom-models"]
+            }
+          }
+        },
+        {
+          "name": "Create Product-to-Model",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Red Sneaker Model\",\n  \"prompt\": \"professional studio setting with white background\",\n  \"model_type\": \"product-to-model\",\n  \"product_image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/custom-models",
+              "host": ["{{base_url}}"],
+              "path": ["custom-models"]
+            }
+          }
+        },
+        {
+          "name": "Get All Custom Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/custom-models",
+              "host": ["{{base_url}}"],
+              "path": ["custom-models"]
+            }
+          }
+        },
+        {
+          "name": "Get Model by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/custom-models/{{model_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["custom-models", "{{model_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Model Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/custom-models/{{model_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["custom-models", "{{model_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Update Model",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Model Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/custom-models/{{model_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["custom-models", "{{model_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Retry Model Creation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/custom-models/{{model_id}}/retry",
+              "host": ["{{base_url}}"],
+              "path": ["custom-models", "{{model_id}}", "retry"]
+            }
+          }
+        },
+        {
+          "name": "Delete Model",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/custom-models/{{model_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["custom-models", "{{model_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎯 Try-On Workflows",
+      "item": [
+        {
+          "name": "Classic Try-On",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data.id) {",
+                  "        pm.collectionVariables.set('try_on_id', response.data.id);",
+                  "        console.log('Try-on ID saved:', response.data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"self_image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...\",\n  \"dress_image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/try-on/classic",
+              "host": ["{{base_url}}"],
+              "path": ["try-on", "classic"]
+            }
+          }
+        },
+        {
+          "name": "Product-to-Model Showcase",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...\",\n  \"product_name\": \"Nike Air Max\",\n  \"scene_prompt\": \"modern urban street setting with natural lighting\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/try-on/product-to-model",
+              "host": ["{{base_url}}"],
+              "path": ["try-on", "product-to-model"]
+            }
+          }
+        },
+        {
+          "name": "Text-to-Fashion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fashion_description\": \"Elegant black evening dress with silver accessories\",\n  \"scene_prompt\": \"luxurious hotel lobby with soft lighting\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/try-on/text-to-fashion",
+              "host": ["{{base_url}}"],
+              "path": ["try-on", "text-to-fashion"]
+            }
+          }
+        },
+        {
+          "name": "Avatar Try-On (Classic)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"avatar_id\": \"{{avatar_id}}\",\n  \"garment_image_url\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...\",\n  \"try_on_type\": \"classic\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/try-on/avatar",
+              "host": ["{{base_url}}"],
+              "path": ["try-on", "avatar"]
+            }
+          }
+        },
+        {
+          "name": "Avatar Try-On (Text-to-Fashion)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"avatar_id\": \"{{avatar_id}}\",\n  \"garment_description\": \"red leather jacket with black jeans\",\n  \"try_on_type\": \"text-to-fashion\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/try-on/avatar",
+              "host": ["{{base_url}}"],
+              "path": ["try-on", "avatar"]
+            }
+          }
+        },
+        {
+          "name": "Get Try-On Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/try-on/{{try_on_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["try-on", "{{try_on_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Get Try-On by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/try-on/{{try_on_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["try-on", "{{try_on_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get All Try-Ons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/try-on",
+              "host": ["{{base_url}}"],
+              "path": ["try-on"]
+            }
+          }
+        },
+        {
+          "name": "Delete Try-On",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/try-on/{{try_on_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["try-on", "{{try_on_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👕 Wardrobe Management",
+      "item": [
+        {
+          "name": "Add to Wardrobe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"try_on_id\": \"{{try_on_id}}\",\n  \"liked\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/wardrobe",
+              "host": ["{{base_url}}"],
+              "path": ["wardrobe"]
+            }
+          }
+        },
+        {
+          "name": "Get User Wardrobe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wardrobe",
+              "host": ["{{base_url}}"],
+              "path": ["wardrobe"]
+            }
+          }
+        },
+        {
+          "name": "Update Wardrobe Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"liked\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/wardrobe/{{try_on_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["wardrobe", "{{try_on_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Remove from Wardrobe",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wardrobe/{{try_on_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["wardrobe", "{{try_on_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wardrobe/stats",
+              "host": ["{{base_url}}"],
+              "path": ["wardrobe", "stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 System",
+      "item": [
+        {
+          "name": "Get Credits Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/try-on/credits",
+              "host": ["{{base_url}}"],
+              "path": ["try-on", "credits"]
+            }
+          }
+        },
+        {
+          "name": "Get Available Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/models",
+              "host": ["{{base_url}}"],
+              "path": ["models"]
+            }
+          }
+        },
+        {
+          "name": "Get Model by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/models/1",
+              "host": ["{{base_url}}"],
+              "path": ["models", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-set authentication header if token exists",
+          "const token = pm.collectionVariables.get('auth_token');",
+          "if (token && !pm.request.headers.has('Authorization')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: `Bearer ${token}`",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}

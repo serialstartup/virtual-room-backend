@@ -80,24 +80,32 @@ export const wardrobeService = {
     }
   },
 
-  async getWardrobe(userId: string): Promise<Wardrobe[]> {
+  async getWardrobe(userId: string, filter?: 'all' | 'liked' | 'disliked'): Promise<Wardrobe[]> {
     try {
       validateUserId(userId)
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('wardrobe')
         .select(`
           *,
           try_on:try_on(*)
         `)
         .eq('user_id', userId)
-        .order('created_at', { ascending: false })
+
+      // Apply filter
+      if (filter === 'liked') {
+        query = query.eq('liked', true)
+      } else if (filter === 'disliked') {
+        query = query.eq('liked', false)
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) {
         handleSupabaseError(error, 'getting wardrobe')
       }
 
-      return data
+      return data || []
     } catch (error) {
       handleSupabaseError(error, 'getting wardrobe')
       throw error
@@ -118,7 +126,7 @@ export const wardrobeService = {
         handleSupabaseError(error, 'getting favorites')
       }
 
-      return data
+      return data || []
     } catch (error) {
       handleSupabaseError(error, 'getting favorites')
       throw error
@@ -143,7 +151,7 @@ export const wardrobeService = {
         handleSupabaseError(error, 'getting disliked items')
       }
 
-      return data
+      return data || []
     } catch (error) {
       handleSupabaseError(error, 'getting disliked items')
       throw error
@@ -168,7 +176,7 @@ export const wardrobeService = {
         handleSupabaseError(error, 'getting undecided items')
       }
 
-      return data
+      return data || []
     } catch (error) {
       handleSupabaseError(error, 'getting undecided items')
       throw error
@@ -179,18 +187,38 @@ export const wardrobeService = {
     try {
       validateUserId(userId)
 
-      const { data, error } = await supabase
-        .from('user_stats')
-        .select('*')
-        .eq('user_id', userId)
-        .single()
+      console.log('[WARDROBE_SERVICE] 📊 Getting user stats for:', userId)
 
-      if (error) {
-        handleSupabaseError(error, 'getting user stats')
+      // Get all wardrobe items for this user
+      const { data: wardrobeItems, error: wardrobeError } = await supabase
+        .from('wardrobe')
+        .select('liked')
+        .eq('user_id', userId)
+
+      if (wardrobeError) {
+        console.error('[WARDROBE_SERVICE] ❌ Error getting wardrobe for stats:', wardrobeError)
+        handleSupabaseError(wardrobeError, 'getting wardrobe for stats')
       }
 
-      return data
+      // Calculate statistics from wardrobe items
+      const totalTryOns = wardrobeItems?.length || 0
+      const favoritesCount = wardrobeItems?.filter(item => item.liked === true).length || 0
+      const dislikedCount = wardrobeItems?.filter(item => item.liked === false).length || 0
+
+      const stats = {
+        user_id: userId,
+        total_try_ons: totalTryOns,
+        favorites_count: favoritesCount,
+        disliked_count: dislikedCount,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+
+      console.log('[WARDROBE_SERVICE] ✅ User stats calculated:', stats)
+
+      return stats
     } catch (error) {
+      console.error('[WARDROBE_SERVICE] 🚨 Get user stats error:', error)
       handleSupabaseError(error, 'getting user stats')
       throw error
     }

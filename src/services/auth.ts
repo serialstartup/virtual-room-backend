@@ -38,10 +38,11 @@ export class AuthService {
 
   static generateJWT(payload: JWTPayload): string {
     try {
-      return jwt.sign(payload, JWT_SECRET, {
+      const options: any = {
         expiresIn: JWT_EXPIRY,
         issuer: "virtual-room-backend",
-      });
+      };
+      return jwt.sign(payload, JWT_SECRET as string, options);
     } catch (error) {
       throw new Error("Token oluşturma işlemi başarısız oldu");
     }
@@ -120,6 +121,8 @@ export class AuthService {
 
   private static async createDefaultUserSettings(userId: string, acceptLanguage?: string): Promise<void> {
     try {
+      console.log(`[AUTH_SERVICE] 🔧 Creating default settings for user: ${userId}`);
+      
       // Detect language from Accept-Language header or default to 'tr'
       let language = 'tr';
       if (acceptLanguage) {
@@ -129,22 +132,32 @@ export class AuthService {
         language = primaryLang === 'en' ? 'en' : 'tr';
       }
 
-      const { error } = await supabase
+      console.log(`[AUTH_SERVICE] 🌍 Detected language: ${language}`);
+
+      const settingsData = {
+        user_id: userId,
+        push_notifications: true,
+        email_notifications: true,
+        new_features: true,
+        language: language
+      };
+
+      console.log(`[AUTH_SERVICE] 📋 Inserting settings:`, settingsData);
+
+      const { data, error } = await supabase
         .from("user_settings")
-        .insert({
-          user_id: userId,
-          push_notifications: true,
-          email_notifications: true,
-          new_features: true,
-          language: language
-        });
+        .insert(settingsData)
+        .select("*")
+        .single();
 
       if (error) {
-        console.warn("Default user settings creation failed:", error);
+        console.error(`[AUTH_SERVICE] ❌ Default user settings creation failed:`, error);
         // Don't throw error, let signup succeed even if settings creation fails
+      } else {
+        console.log(`[AUTH_SERVICE] ✅ Default user settings created:`, data);
       }
     } catch (error: any) {
-      console.warn("Default user settings creation error:", error);
+      console.error(`[AUTH_SERVICE] 🚨 Default user settings creation error:`, error);
     }
   }
 
@@ -236,5 +249,11 @@ export class AuthService {
       console.error("Delete user error:", error);
       throw error;
     }
+  }
+
+  // Helper method to create default settings for existing users
+  static async createDefaultUserSettingsForExistingUser(userId: string): Promise<void> {
+    console.log(`[AUTH_SERVICE] 🔄 Creating default settings for existing user: ${userId}`);
+    return this.createDefaultUserSettings(userId, 'tr');
   }
 }

@@ -47,7 +47,10 @@ export interface JWTPayload {
 }
 
 export interface AuthenticatedRequest extends Request {
-  user?: JWTPayload
+  user?: {
+    userId: string
+    email: string
+  }
 }
 
 export interface UserSettings {
