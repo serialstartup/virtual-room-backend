@@ -2,7 +2,7 @@
   "name": "virtual-room-backend",
   "version": "1.0.0",
   "description": "Backend API for Virtual Room - FAL.AI Integration",
-  "main": "src/app.js",
+  "main": "dist/app.js",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/app.ts",

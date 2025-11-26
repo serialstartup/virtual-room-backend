@@ -6,21 +6,27 @@ export class AvatarController {
             const { name, face_image_url } = req.body;
             const userId = req.user.userId;
             // Validate input
-            if (!name || !face_image_url) {
+            if (!face_image_url) {
                 res.status(400).json({
                     success: false,
-                    error: "Name and face_image_url are required",
+                    error: "face_image_url is required",
                 });
                 return;
             }
+            // Generate random name if empty or not provided
+            const generateRandomName = () => {
+                return 'Avatar' + Math.random().toString(36).substring(2, 10).toUpperCase();
+            };
+            const finalName = name && name.trim() ? name.trim() : generateRandomName();
             console.log('[AVATAR_CONTROLLER] 👤 Creating avatar:', {
                 userId: userId.substring(0, 8) + '...',
-                name,
+                name: finalName,
+                originalName: name,
                 faceImageUrl: face_image_url.substring(0, 50) + '...'
             });
             // Create avatar record in database
             const avatar = await avatarService.createAvatar(userId, {
-                name,
+                name: finalName,
                 face_image_url
             });
             // Start Fashion AI processing in background

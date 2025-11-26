@@ -189,34 +189,67 @@ export const wardrobeService = {
 
       console.log('[WARDROBE_SERVICE] 📊 Getting user stats for:', userId)
 
-      // Get all wardrobe items for this user
-      const { data: wardrobeItems, error: wardrobeError } = await supabase
-        .from('wardrobe')
-        .select('liked')
+      // Try to get existing stats from user_stats table
+      const { data: existingStats, error: statsError } = await supabase
+        .from('user_stats')
+        .select('*')
         .eq('user_id', userId)
+        .single()
 
-      if (wardrobeError) {
-        console.error('[WARDROBE_SERVICE] ❌ Error getting wardrobe for stats:', wardrobeError)
-        handleSupabaseError(wardrobeError, 'getting wardrobe for stats')
+      // If stats don't exist, create them by calculating from wardrobe
+      if (statsError || !existingStats) {
+        console.log('[WARDROBE_SERVICE] 📊 Stats not found, creating new ones...')
+        
+        // Get all wardrobe items for this user
+        const { data: wardrobeItems, error: wardrobeError } = await supabase
+          .from('wardrobe')
+          .select('liked')
+          .eq('user_id', userId)
+
+        if (wardrobeError) {
+          console.error('[WARDROBE_SERVICE] ❌ Error getting wardrobe for stats:', wardrobeError)
+          handleSupabaseError(wardrobeError, 'getting wardrobe for stats')
+        }
+
+        // Calculate statistics from wardrobe items
+        const totalTryOns = wardrobeItems?.length || 0
+        const favoritesCount = wardrobeItems?.filter(item => item.liked === true).length || 0
+        const dislikedCount = wardrobeItems?.filter(item => item.liked === false).length || 0
+        const undecidedCount = wardrobeItems?.filter(item => item.liked === null).length || 0
+
+        // Insert new stats
+        const { data: newStats, error: insertError } = await supabase
+          .from('user_stats')
+          .insert({
+            user_id: userId,
+            total_try_ons: totalTryOns,
+            favorites_count: favoritesCount,
+            disliked_count: dislikedCount,
+            undecided_count: undecidedCount
+          })
+          .select()
+          .single()
+
+        if (insertError) {
+          console.error('[WARDROBE_SERVICE] ❌ Error inserting user stats:', insertError)
+          // Return calculated stats even if insert fails
+          return {
+            user_id: userId,
+            total_try_ons: totalTryOns,
+            favorites_count: favoritesCount,
+            disliked_count: dislikedCount,
+            undecided_count: undecidedCount,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        }
+
+        console.log('[WARDROBE_SERVICE] ✅ New user stats created:', newStats)
+        return newStats
       }
 
-      // Calculate statistics from wardrobe items
-      const totalTryOns = wardrobeItems?.length || 0
-      const favoritesCount = wardrobeItems?.filter(item => item.liked === true).length || 0
-      const dislikedCount = wardrobeItems?.filter(item => item.liked === false).length || 0
-
-      const stats = {
-        user_id: userId,
-        total_try_ons: totalTryOns,
-        favorites_count: favoritesCount,
-        disliked_count: dislikedCount,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-
-      console.log('[WARDROBE_SERVICE] ✅ User stats calculated:', stats)
-
-      return stats
+      console.log('[WARDROBE_SERVICE] ✅ User stats found:', existingStats)
+      return existingStats
     } catch (error) {
       console.error('[WARDROBE_SERVICE] 🚨 Get user stats error:', error)
       handleSupabaseError(error, 'getting user stats')

@@ -4,7 +4,8 @@ export interface User {
   id: string
   name: string
   email: string
-  premium_status: boolean
+  token: number
+  total_tokens_used: number
   active: boolean
   created_at: string
   updated_at: string
@@ -68,4 +69,28 @@ export interface UpdateUserSettingsRequest {
   email_notifications?: boolean
   new_features?: boolean
   language?: string
+}
+
+export interface TokenTransaction {
+  id: string
+  user_id: string
+  transaction_type: 'credit' | 'debit' | 'purchase' | 'refund' | 'gift'
+  amount: number
+  description: string | null
+  try_on_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface TokenBalance {
+  current_balance: number
+  total_used: number
+  total_purchased: number
+  has_sufficient_balance: boolean
+}
+
+export interface TokenUsageRequest {
+  amount: number
+  description: string
+  try_on_id?: string
 }

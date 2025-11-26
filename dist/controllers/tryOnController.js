@@ -1,6 +1,7 @@
 import { tryOnService } from "../services/try-on.js";
 import { FashionAIService } from "../services/fashionAI.js";
 import { avatarService } from "../services/avatarService.js";
+import { TokenService } from "../services/tokenService.js";
 export class TryOnController {
     static async getTryOns(req, res) {
         try {
@@ -77,6 +78,16 @@ export class TryOnController {
                     avatarId: avatar_id.substring(0, 8) + '...',
                     avatarImageUrl: avatar.avatar_image_url.substring(0, 50) + '...'
                 });
+            }
+            // Check and use tokens for this operation
+            const tokenResult = await TokenService.validateAndUseTokensForTryOn(userId, 'CLASSIC_TRY_ON', '' // We'll update this with actual tryOn ID after creation
+            );
+            if (!tokenResult.success) {
+                res.status(402).json({
+                    success: false,
+                    error: tokenResult.error || "Insufficient tokens"
+                });
+                return;
             }
             // Create try-on record
             const tryOn = await tryOnService.createTryOn(userId, {
@@ -223,6 +234,16 @@ export class TryOnController {
                     avatarImageUrl: avatar.avatar_image_url.substring(0, 50) + '...'
                 });
             }
+            // Check and use tokens for classic try-on
+            const tokenResult = await TokenService.validateAndUseTokensForTryOn(userId, 'CLASSIC_TRY_ON', '' // We'll update this with actual tryOn ID after creation
+            );
+            if (!tokenResult.success) {
+                res.status(402).json({
+                    success: false,
+                    error: tokenResult.error || "Insufficient tokens for classic try-on"
+                });
+                return;
+            }
             // Create try-on record
             const tryOn = await tryOnService.createTryOn(userId, {
                 self_image,
@@ -275,6 +296,16 @@ export class TryOnController {
                 productName: product_name,
                 hasScenePrompt: !!scene_prompt
             });
+            // Check and use tokens for product-to-model
+            const tokenResult = await TokenService.validateAndUseTokensForTryOn(userId, 'PRODUCT_TO_MODEL', '' // We'll update this with actual tryOn ID after creation
+            );
+            if (!tokenResult.success) {
+                res.status(402).json({
+                    success: false,
+                    error: tokenResult.error || "Insufficient tokens for product-to-model"
+                });
+                return;
+            }
             // Create try-on record with product-to-model type
             const tryOn = await tryOnService.createTryOn(userId, {
                 dress_image: product_image,
@@ -316,6 +347,16 @@ export class TryOnController {
                 descriptionLength: fashion_description.length,
                 hasScenePrompt: !!scene_prompt
             });
+            // Check and use tokens for text-to-fashion (costs more)
+            const tokenResult = await TokenService.validateAndUseTokensForTryOn(userId, 'TEXT_TO_FASHION', '' // We'll update this with actual model ID after creation
+            );
+            if (!tokenResult.success) {
+                res.status(402).json({
+                    success: false,
+                    error: tokenResult.error || "Insufficient tokens for text-to-fashion"
+                });
+                return;
+            }
             // Combine fashion description with scene prompt if provided
             const fullPrompt = scene_prompt
                 ? `${fashion_description}, ${scene_prompt}`
@@ -382,6 +423,16 @@ export class TryOnController {
                 });
                 return;
             }
+            // Check and use tokens for avatar try-on
+            const tokenResult = await TokenService.validateAndUseTokensForTryOn(userId, 'AVATAR_TRY_ON', '' // We'll update this with actual tryOn ID after creation
+            );
+            if (!tokenResult.success) {
+                res.status(402).json({
+                    success: false,
+                    error: tokenResult.error || "Insufficient tokens for avatar try-on"
+                });
+                return;
+            }
             // Create regular try-on using avatar as model image
             const tryOnData = {
                 model_image: avatar.avatar_image_url
@@ -422,7 +473,12 @@ export class TryOnController {
     }
     static async getCredits(req, res) {
         try {
-            const credits = await FashionAIService.getCreditsBalance();
+            const userId = req.user.userId;
+            const tokenBalance = await TokenService.getTokenBalance(userId);
+            // Convert to the expected credits format for frontend compatibility
+            const credits = {
+                credits: tokenBalance.current_balance
+            };
             const response = {
                 success: true,
                 data: credits,
@@ -433,7 +489,7 @@ export class TryOnController {
             console.error("Get credits error:", error);
             const response = {
                 success: false,
-                error: error.message || "Failed to get credits balance",
+                error: error.message || "Failed to get token balance",
             };
             res.status(500).json(response);
         }

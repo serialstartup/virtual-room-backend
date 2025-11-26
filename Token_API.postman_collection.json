@@ -1,0 +1,523 @@
+{
+	"info": {
+		"_postman_id": "token-api-collection-v1",
+		"name": "Virtual Room - Token API",
+		"description": "Token management API endpoints for Virtual Room application. Includes balance management, transaction history, and token operations.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "token-api-v1"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/auth/login",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/auth/signup",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "auth", "signup"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Token Management",
+			"item": [
+				{
+					"name": "Get Token Balance",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/tokens/balance",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tokens", "balance"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{AUTH_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/api/tokens/balance",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "tokens", "balance"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"current_balance\": 3,\n    \"total_used\": 0,\n    \"total_purchased\": 3,\n    \"has_sufficient_balance\": true\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Transaction History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/tokens/history?limit=20",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tokens", "history"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Number of transactions to fetch (default: 50)"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{AUTH_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/api/tokens/history",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "tokens", "history"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"uuid\",\n      \"user_id\": \"uuid\",\n      \"transaction_type\": \"gift\",\n      \"amount\": 3,\n      \"description\": \"Welcome gift - 3 free tokens\",\n      \"try_on_id\": null,\n      \"created_at\": \"2024-11-18T10:00:00Z\",\n      \"updated_at\": \"2024-11-18T10:00:00Z\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Token Costs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/tokens/costs",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tokens", "costs"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{AUTH_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/api/tokens/costs",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "tokens", "costs"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"CLASSIC_TRY_ON\": 1,\n    \"PRODUCT_TO_MODEL\": 1,\n    \"TEXT_TO_FASHION\": 2,\n    \"AVATAR_TRY_ON\": 1,\n    \"AVATAR_CREATION\": 3,\n    \"CUSTOM_MODEL\": 2\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Token Packages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/tokens/packages",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tokens", "packages"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{AUTH_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/api/tokens/packages",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "tokens", "packages"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"starter\",\n      \"name\": \"Starter Pack\",\n      \"tokens\": 10,\n      \"price\": 9.99,\n      \"currency\": \"USD\",\n      \"popular\": false\n    },\n    {\n      \"id\": \"premium\",\n      \"name\": \"Premium Pack\",\n      \"tokens\": 25,\n      \"price\": 19.99,\n      \"currency\": \"USD\",\n      \"popular\": true,\n      \"savings\": \"20%\"\n    },\n    {\n      \"id\": \"pro\",\n      \"name\": \"Pro Pack\",\n      \"tokens\": 50,\n      \"price\": 34.99,\n      \"currency\": \"USD\",\n      \"popular\": false,\n      \"savings\": \"30%\"\n    }\n  ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Purchase Tokens",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"package_type\": \"premium\",\n  \"amount\": 25\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/tokens/purchase",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tokens", "purchase"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{AUTH_TOKEN}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"package_type\": \"premium\",\n  \"amount\": 25\n}"
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/tokens/purchase",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "tokens", "purchase"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uuid\",\n    \"user_id\": \"uuid\",\n    \"transaction_type\": \"purchase\",\n    \"amount\": 25,\n    \"description\": \"Token package purchase: premium\",\n    \"try_on_id\": null,\n    \"created_at\": \"2024-11-18T10:00:00Z\",\n    \"updated_at\": \"2024-11-18T10:00:00Z\"\n  }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Try-On Operations (Token Usage)",
+			"item": [
+				{
+					"name": "Classic Try-On",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"self_image\": \"https://example.com/person.jpg\",\n  \"dress_image\": \"https://example.com/dress.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/try-on/classic",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "try-on", "classic"]
+						}
+					},
+					"response": [
+						{
+							"name": "Insufficient Tokens",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{AUTH_TOKEN}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"self_image\": \"https://example.com/person.jpg\",\n  \"dress_image\": \"https://example.com/dress.jpg\"\n}"
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/api/try-on/classic",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "try-on", "classic"]
+								}
+							},
+							"status": "Payment Required",
+							"code": 402,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"error\": \"Insufficient token balance for this operation\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Text to Fashion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fashion_description\": \"Elegant black evening dress with silver accessories\",\n  \"scene_prompt\": \"professional studio setting\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/try-on/text-to-fashion",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "try-on", "text-to-fashion"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Product to Model",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"product_image\": \"https://example.com/product.jpg\",\n  \"product_name\": \"Nike Air Max\",\n  \"scene_prompt\": \"athletic wear showcase\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/try-on/product-to-model",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "try-on", "product-to-model"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Credits (Legacy)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AUTH_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/try-on/credits",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "try-on", "credits"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{AUTH_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/api/try-on/credits",
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "try-on", "credits"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"credits\": 3\n  }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Admin Operations",
+			"item": [
+				{
+					"name": "Credit Tokens to User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"target_user_id\": \"user-uuid-here\",\n  \"amount\": 10,\n  \"description\": \"Support credit - problem resolution\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/tokens/admin/credit",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "tokens", "admin", "credit"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "AUTH_TOKEN",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ADMIN_TOKEN",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

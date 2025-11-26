@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { supabase, handleSupabaseError } from "./supabase.js";
 import { createNameFromEmail } from "../helper/convert.js";
+import { TokenService } from "./tokenService.js";
 import type {
   User,
   UserWithPassword,
@@ -53,11 +54,11 @@ export class AuthService {
       return jwt.verify(token, JWT_SECRET) as JWTPayload;
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        throw new Error("Token süresi dolmuş");
+        throw new Error("Token expired");
       } else if (error instanceof jwt.JsonWebTokenError) {
-        throw new Error("Geçersiz token");
+        throw new Error("Invalid token");
       }
-      throw new Error("Token doğrulama işlemi başarısız oldu");
+      throw new Error("Token verification failed");
     }
   }
 
@@ -100,7 +101,7 @@ export class AuthService {
           password_hash: hashedPassword,
           active: true,
         })
-        .select("id, name, email, premium_status, active, created_at, updated_at")
+        .select("id, name, email, token, total_tokens_used, active, created_at, updated_at")
         .single();
 
       if (error) {
@@ -111,6 +112,18 @@ export class AuthService {
 
       // Create default user settings
       await this.createDefaultUserSettings(user.id, acceptLanguage);
+
+      // Create default user stats
+      await this.createDefaultUserStats(user.id);
+
+      // Give welcome tokens to new user
+      try {
+        await TokenService.giveWelcomeTokens(user.id);
+        console.log(`[AUTH_SERVICE] ✅ Welcome tokens given to user: ${user.id}`);
+      } catch (tokenError) {
+        console.error(`[AUTH_SERVICE] ❌ Failed to give welcome tokens:`, tokenError);
+        // Don't throw error, let signup succeed even if token gift fails
+      }
 
       return user;
     } catch (error: any) {
@@ -161,6 +174,37 @@ export class AuthService {
     }
   }
 
+  private static async createDefaultUserStats(userId: string): Promise<void> {
+    try {
+      console.log(`[AUTH_SERVICE] 📊 Creating default stats for user: ${userId}`);
+
+      const statsData = {
+        user_id: userId,
+        total_try_ons: 0,
+        favorites_count: 0,
+        disliked_count: 0,
+        undecided_count: 0
+      };
+
+      console.log(`[AUTH_SERVICE] 📊 Inserting stats:`, statsData);
+
+      const { data, error } = await supabase
+        .from("user_stats")
+        .insert(statsData)
+        .select("*")
+        .single();
+
+      if (error) {
+        console.error(`[AUTH_SERVICE] ❌ Default user stats creation failed:`, error);
+        // Don't throw error, let signup succeed even if stats creation fails
+      } else {
+        console.log(`[AUTH_SERVICE] ✅ Default user stats created:`, data);
+      }
+    } catch (error: any) {
+      console.error(`[AUTH_SERVICE] 🚨 Default user stats creation error:`, error);
+    }
+  }
+
   static async login(credentials: LoginRequest): Promise<User> {
     try {
       const { data, error } = await supabase
@@ -196,7 +240,7 @@ export class AuthService {
     try {
       const { data, error } = await supabase
         .from("users")
-        .select("id, name, email, premium_status, active, created_at, updated_at")
+        .select("id, name, email, token, total_tokens_used, active, created_at, updated_at")
         .eq("id", userId)
         .eq("active", true)
         .single();
@@ -221,7 +265,7 @@ export class AuthService {
         .update({ name: userData.name })
         .eq("id", userId)
         .eq("active", true)
-        .select("id, name, email, premium_status, active, created_at, updated_at")
+        .select("id, name, email, token, total_tokens_used, active, created_at, updated_at")
         .single();
 
       if (error) {

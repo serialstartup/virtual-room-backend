@@ -1,6 +1,6 @@
 -- Create user_stats table for tracking user wardrobe statistics
 CREATE TABLE IF NOT EXISTS public.user_stats (
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   total_try_ons INTEGER DEFAULT 0,
   favorites_count INTEGER DEFAULT 0,
   disliked_count INTEGER DEFAULT 0,
@@ -12,23 +12,24 @@ CREATE TABLE IF NOT EXISTS public.user_stats (
 -- Add RLS (Row Level Security) policies
 ALTER TABLE public.user_stats ENABLE ROW LEVEL SECURITY;
 
--- Policy: Users can only read their own stats
+-- Policy: Allow all operations for service role (backend handles auth)
+CREATE POLICY "Enable full access for service role" 
+ON public.user_stats
+FOR ALL
+TO service_role
+USING (true);
+
+-- Policy: Users can read their own stats (for client-side access)
 CREATE POLICY "Users can read own user_stats"
 ON public.user_stats
 FOR SELECT
-USING (auth.uid() = user_id);
+USING (user_id::text = current_setting('app.user_id', true));
 
--- Policy: Users can update their own stats  
+-- Policy: Users can update their own stats
 CREATE POLICY "Users can update own user_stats"
 ON public.user_stats
 FOR UPDATE
-USING (auth.uid() = user_id);
-
--- Policy: Users can insert their own stats
-CREATE POLICY "Users can insert own user_stats" 
-ON public.user_stats
-FOR INSERT
-WITH CHECK (auth.uid() = user_id);
+USING (user_id::text = current_setting('app.user_id', true));
 
 -- Create function to automatically update user_stats when wardrobe items change
 CREATE OR REPLACE FUNCTION update_user_stats()

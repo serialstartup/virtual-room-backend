@@ -11,7 +11,7 @@ export class UserService {
         try {
           const { data, error } = await supabase
             .from("users")
-            .select("id, name, email, premium_status, active, created_at, updated_at")
+            .select("id, name, email, token, total_tokens_used, active, created_at, updated_at")
             .eq("id", userId)
             .eq("active", true)
             .single();
@@ -36,7 +36,7 @@ export class UserService {
             .update({ name: userData.name })
             .eq("id", userId)
             .eq("active", true)
-            .select("id, name, email, premium_status, active, created_at, updated_at")
+            .select("id, name, email, token, total_tokens_used, active, created_at, updated_at")
             .single();
     
           if (error) {
@@ -69,7 +69,7 @@ export class UserService {
         try {
           const { data, error } = await supabase
             .from("users")
-            .select("id, name, email, premium_status, active, created_at, updated_at")
+            .select("id, name, email, token, total_tokens_used, active, created_at, updated_at")
             .eq("active", true)
             .order("created_at", { ascending: false });
 

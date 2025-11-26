@@ -52,6 +52,7 @@ export interface UserStats {
   total_try_ons: number
   favorites_count: number
   disliked_count: number
+  undecided_count: number
   created_at: string
   updated_at: string
 }

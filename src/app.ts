@@ -16,6 +16,9 @@ import wardrobeRoutes from './routes/wardrobe.js'
 import modelsRoutes from './routes/models.js'
 import customModelsRoutes from './routes/customModels.js'
 import avatarsRoutes from './routes/avatars.js'
+import { tokenRoutes } from './routes/tokens.js'
+import feedbackRoutes from './routes/feedback.js'
+import downloadRoutes from './routes/download.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -47,6 +50,9 @@ app.use('/api/wardrobe', wardrobeRoutes)
 app.use('/api/models', modelsRoutes)
 app.use('/api/custom-models', customModelsRoutes)
 app.use('/api/avatars', avatarsRoutes)
+app.use('/api/tokens', tokenRoutes)
+app.use('/api/feedback', feedbackRoutes)
+app.use('/api/download', downloadRoutes)
 
 app.use('*', (req, res) => {
   res.status(404).json({
@@ -73,6 +79,9 @@ app.listen(PORT, () => {
   console.log(`👤 Models API: http://localhost:${PORT}/api/models`)
   console.log(`🎨 Custom Models API: http://localhost:${PORT}/api/custom-models`)
   console.log(`👤 Avatars API: http://localhost:${PORT}/api/avatars`)
+  console.log(`💰 Tokens API: http://localhost:${PORT}/api/tokens`)
+  console.log(`👍 Feedback API: http://localhost:${PORT}/api/feedback`)
+  console.log(`📥 Download API: http://localhost:${PORT}/api/download`)
   console.log(`📁 Static files: http://localhost:${PORT}/public`)
 })
 

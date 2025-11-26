@@ -8,6 +8,7 @@ export declare class AuthService {
     static checkEmailExists(email: string): Promise<boolean>;
     static signup(userData: SignupRequest, acceptLanguage?: string): Promise<User>;
     private static createDefaultUserSettings;
+    private static createDefaultUserStats;
     static login(credentials: LoginRequest): Promise<User>;
     static getUserById(userId: string): Promise<User | null>;
     static updateUser(userId: string, userData: UpdateUserRequest): Promise<User>;
