@@ -76,8 +76,30 @@ jobs:
     - name: Test Docker image
       run: |
         docker run -d -p 3000:3000 --name test-container virtual-room-backend:${{ github.sha }}
-        sleep 10
-        curl -f http://localhost:3000/ || exit 1
+        
+        # Wait for container to be healthy (max 60 seconds)
+        echo "Waiting for container to be healthy..."
+        for i in {1..12}; do
+          if docker inspect --format='{{.State.Health.Status}}' test-container 2>/dev/null | grep -q "healthy"; then
+            echo "Container is healthy!"
+            break
+          fi
+          if [ $i -eq 12 ]; then
+            echo "Container failed to become healthy"
+            docker logs test-container
+            docker stop test-container
+            docker rm test-container
+            exit 1
+          fi
+          echo "Attempt $i/12: Container not healthy yet, waiting..."
+          sleep 5
+        done
+        
+        # Test the endpoint
+        echo "Testing endpoint..."
+        curl -f http://localhost:3000/ || (docker logs test-container && exit 1)
+        
+        # Cleanup
         docker stop test-container
         docker rm test-container
 
