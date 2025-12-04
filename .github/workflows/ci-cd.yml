@@ -74,8 +74,25 @@ jobs:
       run: docker build -t virtual-room-backend:${{ github.sha }} .
       
     - name: Test Docker image
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        FASHION_AI_API_KEY: ${{ secrets.FASHION_AI_API_KEY }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+        REVENUECAT_SECRET_KEY: ${{ secrets.REVENUECAT_SECRET_KEY }}
       run: |
-        docker run -d -p 3000:3000 --name test-container virtual-room-backend:${{ github.sha }}
+        docker run -d -p 3000:3000 \
+          -e SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+          -e SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
+          -e FASHION_AI_API_KEY="${{ secrets.FASHION_AI_API_KEY }}" \
+          -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+          -e FRONTEND_URL="${{ secrets.FRONTEND_URL }}" \
+          -e REVENUECAT_SECRET_KEY="${{ secrets.REVENUECAT_SECRET_KEY }}" \
+          -e NODE_ENV=production \
+          -e PORT=3000 \
+          --name test-container virtual-room-backend:${{ github.sha }}
         
         # Wait for container to be healthy (max 60 seconds)
         echo "Waiting for container to be healthy..."
