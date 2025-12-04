@@ -86,6 +86,7 @@ jobs:
         docker run -d -p 3000:3000 \
           -e SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
           -e SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
+          -e SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
           -e FASHION_AI_API_KEY="${{ secrets.FASHION_AI_API_KEY }}" \
           -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
           -e FRONTEND_URL="${{ secrets.FRONTEND_URL }}" \
