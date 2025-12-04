@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dotenv.config({ path: join(__dirname, "../.env") });
+console.warn("Change the world, otherwise what's the point?");
 
 import express from "express";
 import cors from "cors";
