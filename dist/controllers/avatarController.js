@@ -55,7 +55,7 @@ export class AvatarController {
             const avatars = await avatarService.getUserAvatars(userId);
             const response = {
                 success: true,
-                data: avatars,
+                data: { avatars },
             };
             res.json(response);
         }

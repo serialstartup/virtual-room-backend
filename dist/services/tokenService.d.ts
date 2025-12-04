@@ -8,7 +8,7 @@ export declare class TokenService {
         readonly AVATAR_CREATION: 3;
         readonly CUSTOM_MODEL: 2;
     };
-    static readonly FREE_TOKENS_ON_SIGNUP = 3;
+    static readonly FREE_TOKENS_ON_SIGNUP = 5;
     /**
      * Get user's current token balance and usage statistics
      */

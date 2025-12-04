@@ -10,7 +10,7 @@ export class TokenService {
         CUSTOM_MODEL: 2
     };
     // Free tokens given to new users
-    static FREE_TOKENS_ON_SIGNUP = 3;
+    static FREE_TOKENS_ON_SIGNUP = 5;
     /**
      * Get user's current token balance and usage statistics
      */
@@ -93,13 +93,6 @@ export class TokenService {
                 description: usage.description,
                 try_on_id: usage.try_on_id || null
             });
-            console.log(`[TOKEN_SERVICE] ✅ Tokens used:`, {
-                userId: userId.substring(0, 8) + '...',
-                amount: usage.amount,
-                description: usage.description,
-                newBalance,
-                transactionId: transaction.id
-            });
             return transaction;
         }
         catch (error) {
@@ -138,14 +131,6 @@ export class TokenService {
                 description,
                 try_on_id: null
             });
-            console.log(`[TOKEN_SERVICE] ✅ Tokens credited:`, {
-                userId: userId.substring(0, 8) + '...',
-                amount,
-                type: transactionType,
-                description,
-                newBalance,
-                transactionId: transaction.id
-            });
             return transaction;
         }
         catch (error) {
@@ -157,7 +142,7 @@ export class TokenService {
      * Give free tokens to new users
      */
     static async giveWelcomeTokens(userId) {
-        return this.creditTokens(userId, this.FREE_TOKENS_ON_SIGNUP, "Welcome gift - 3 free tokens", "gift");
+        return this.creditTokens(userId, this.FREE_TOKENS_ON_SIGNUP, "Welcome gift - 5 free tokens", "gift");
     }
     /**
      * Get user's token transaction history

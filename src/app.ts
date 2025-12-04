@@ -41,7 +41,7 @@ app.use("/public", express.static(join(__dirname, "../public")));
 app.get("/health", (req, res) => {
   res.json({
     success: true,
-    message: "Virtual Room Backend is running",
+    message: "Fashaura Backend is running",
     timestamp: new Date().toISOString(),
   });
 });
@@ -82,20 +82,7 @@ app.use(
 );
 
 app.listen(PORT, () => {
-  console.log(`🚀 Virtual Room Backend running on port ${PORT}`);
-  console.log(`📖 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
-  console.log(`🎯 Try-on API: http://localhost:${PORT}/api/try-on`);
-  console.log(`👕 Wardrobe API: http://localhost:${PORT}/api/wardrobe`);
-  console.log(`👤 Models API: http://localhost:${PORT}/api/models`);
-  console.log(
-    `🎨 Custom Models API: http://localhost:${PORT}/api/custom-models`
-  );
-  console.log(`👤 Avatars API: http://localhost:${PORT}/api/avatars`);
-  console.log(`💰 Tokens API: http://localhost:${PORT}/api/tokens`);
-  console.log(`👍 Feedback API: http://localhost:${PORT}/api/feedback`);
-  console.log(`📥 Download API: http://localhost:${PORT}/api/download`);
-  console.log(`📁 Static files: http://localhost:${PORT}/public`);
+  console.log(`🚀 Fashaura Backend running on port ${PORT}`);
 });
 
 export default app;

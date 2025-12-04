@@ -1,6 +1,6 @@
 interface FashionAIResponse {
     id: string;
-    status: 'pending' | 'processing' | 'completed' | 'failed';
+    status: "pending" | "processing" | "completed" | "failed";
     output_url?: string;
     error?: string;
 }
@@ -21,7 +21,7 @@ export declare class FashionAIService {
     static createProductToModel(productImageUrl: string, modelImageUrl?: string, prompt?: string): Promise<{
         requestId: string;
     }>;
-    static processCustomModelCreation(userId: string, modelId: string, prompt: string, modelType: 'model-create' | 'product-to-model', productImageUrl?: string): Promise<void>;
+    static processCustomModelCreation(userId: string, modelId: string, prompt: string, modelType: "model-create" | "product-to-model", productImageUrl?: string): Promise<void>;
     private static startCustomModelPolling;
     static createFaceToModel(faceImageUrl: string): Promise<{
         requestId: string;
