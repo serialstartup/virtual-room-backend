@@ -115,7 +115,7 @@ jobs:
         
         # Test the endpoint
         echo "Testing endpoint..."
-        curl -f http://localhost:3000/ || (docker logs test-container && exit 1)
+        curl -f http://localhost:3000/health || (docker logs test-container && exit 1)
         
         # Cleanup
         docker stop test-container
