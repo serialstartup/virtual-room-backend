@@ -21,6 +21,7 @@ import { tokenRoutes } from "./routes/tokens.js";
 import feedbackRoutes from "./routes/feedback.js";
 import downloadRoutes from "./routes/download.js";
 import { purchaseRoutes } from "./routes/purchase.js";
+import saveEmailRoutes from "./routes/saveEmail.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -58,6 +59,7 @@ app.use("/api/tokens", tokenRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/download", downloadRoutes);
 app.use("/api/purchases", purchaseRoutes);
+app.use("/api/save-email", saveEmailRoutes);
 
 app.use("*", (req, res) => {
   res.status(404).json({
