@@ -24,11 +24,17 @@ import { purchaseRoutes } from "./routes/purchase.js";
 import saveEmailRoutes from "./routes/saveEmail.js";
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
+
+// CORS configuration for multiple clients
+const allowedOrigins = [
+  process.env.FRONTEND_URL, // Web app
+  process.env.MOBILE_URL,   // Mobile app  
+].filter((origin): origin is string => Boolean(origin)); // Type-safe filter
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*",
+    origin: allowedOrigins.length > 0 ? allowedOrigins : "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "x-user-id"],
   })
